@@ -54,3 +54,13 @@ async def ModifUtilisateur(donnesModifiees: UtilisateurCreate, id: int, db:Sessi
         db.commit()
         db.refresh(utilisateur)
     return utilisateur
+
+@app.delete("/utilisateur/{id}")
+async def SuppUtilisateur(id: int, db:Session=Depends(get_db)):
+    utilisateur = await getUtilisateur(id, db)
+    if not utilisateur:
+        raise HTTPException(status_code=404, detail="Utilisateur non trouvé")
+    else:
+        db.delete(utilisateur)
+        db.commit()
+    return "Utilisateurs Supprimé"
