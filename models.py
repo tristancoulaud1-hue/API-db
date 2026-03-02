@@ -10,6 +10,7 @@ class Utilisateur(base):
     prénom = Column(String(300))
     mail = Column(String(264))
     idRecommendation = Column(Integer, ForeignKey("RecommendationIA.idRecommendation"))
+    MDP = Column(String(200))
 
 class RecommendationIA(base):
     __tablename__ = "RecommendationIA"

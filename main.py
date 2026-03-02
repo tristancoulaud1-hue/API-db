@@ -3,6 +3,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, Session
 from models import base, Utilisateur
 from pydantic import BaseModel
+from auth import GenereToken
 
 DATABASE_URL = "mssql+pyodbc://./ISEN?driver=ODBC+Driver+17+for+SQL+Server&Trusted_Connection=yes"
 
@@ -14,6 +15,10 @@ class UtilisateurCreate(BaseModel):
     nom : str
     prénom : str
     mail : str
+
+class Login(BaseModel):
+    mail : str
+    MDP : str
 
 @app.get("/")
 async def root():
@@ -64,3 +69,17 @@ async def SuppUtilisateur(id: int, db:Session=Depends(get_db)):
         db.delete(utilisateur)
         db.commit()
     return "Utilisateurs Supprimé"
+
+@app.post("/login")
+async def token(login: Login, db: Session=Depends(get_db)):
+    email = login.mail
+    MDP = login.MDP
+    utilisateur_trouve = db.query(Utilisateur).filter(Utilisateur.mail == email).first()
+    if utilisateur_trouve == None:
+        raise HTTPException(status_code=401, detail="Connexions non-autorisé")
+    elif utilisateur_trouve:
+        if MDP != utilisateur_trouve.MDP:
+            raise HTTPException(status_code=401, detail="Connexions non-autorisé")
+        else:
+            token = GenereToken(utilisateur_trouve.idUtilisateur)
+            return {"acces_token": token, "token_type": "bearer"}
