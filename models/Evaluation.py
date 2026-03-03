@@ -1,9 +1,8 @@
 from sqlalchemy import ForeignKey, Column, Integer, String, DateTime, Time, Identity
-from sqlalchemy.orm import declarative_base
+from models import base
+from models.Module_de_Formation import Module_de_Formation
 
-base = declarative_base()
-
-class Evaluation(base):
+class Evaluation(base.base):
     __tablename__ = "Evaluations"
     idEvaluations = Column(Integer, Identity(start=0, increment=1), primary_key=True)
     type = Column(String(50))

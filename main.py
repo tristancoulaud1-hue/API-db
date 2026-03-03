@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, Session
-from models import base, Utilisateur
+from models.Utilisateur import base, Utilisateur
 from pydantic import BaseModel
 from auth import GenereToken
 
