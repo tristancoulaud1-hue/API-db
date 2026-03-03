@@ -13,8 +13,9 @@ SessionLocal = sessionmaker(bind=engine)
 
 class UtilisateurCreate(BaseModel):
     nom : str
-    prénom : str
+    prenom : str
     mail : str
+    MDP : str
 
 class Login(BaseModel):
     mail : str
@@ -37,7 +38,10 @@ async def utilisateur(db:Session=Depends(get_db)):
 
 @app.post("/utilisateur")
 async def CreateUser(utilisateur:UtilisateurCreate, db: Session=Depends(get_db)):
-    nouveau_user = Utilisateur(nom=utilisateur.nom, prénom=utilisateur.prénom, mail=utilisateur.mail)
+    from passlib.context import CryptContext
+    instance = CryptContext(schemes=["bcrypt"], deprecated="auto")
+    MDP_hash = instance.hash(utilisateur.MDP)
+    nouveau_user = Utilisateur(nom=utilisateur.nom, prenom=utilisateur.prenom, mail=utilisateur.mail, MDP=MDP_hash)
     db.add(nouveau_user)
     db.commit()
     db.refresh(nouveau_user)
@@ -54,7 +58,7 @@ async def ModifUtilisateur(donnesModifiees: UtilisateurCreate, id: int, db:Sessi
         raise HTTPException(status_code=404, detail="Utilisateur non trouvé")
     else:
         utilisateur.nom = donnesModifiees.nom
-        utilisateur.prénom = donnesModifiees.prénom
+        utilisateur.prenom = donnesModifiees.prenom
         utilisateur.mail = donnesModifiees.mail
         db.commit()
         db.refresh(utilisateur)
@@ -72,13 +76,15 @@ async def SuppUtilisateur(id: int, db:Session=Depends(get_db)):
 
 @app.post("/login")
 async def token(login: Login, db: Session=Depends(get_db)):
+    from passlib.context import CryptContext
+    instance = CryptContext(schemes=["bcrypt"], deprecated="auto")
     email = login.mail
     MDP = login.MDP
     utilisateur_trouve = db.query(Utilisateur).filter(Utilisateur.mail == email).first()
     if utilisateur_trouve == None:
         raise HTTPException(status_code=401, detail="Connexions non-autorisé")
-    elif utilisateur_trouve:
-        if MDP != utilisateur_trouve.MDP:
+    else:
+        if not instance.verify(MDP, utilisateur_trouve.MDP):
             raise HTTPException(status_code=401, detail="Connexions non-autorisé")
         else:
             token = GenereToken(utilisateur_trouve.idUtilisateur)
