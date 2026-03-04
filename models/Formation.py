@@ -1,7 +1,7 @@
 from sqlalchemy import ForeignKey, Column, Integer, String, DateTime, Time, Identity
-from models import base
+from . import base
 
-class Formation(base.base):
+class Formation(base):
     __tablename__ = "Formation"
     idFormation = Column(Integer, Identity(start=0, increment=1), primary_key=True)
     titre = Column(String(200))

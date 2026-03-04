@@ -1,8 +1,7 @@
 from sqlalchemy import ForeignKey, Column, Integer, String, DateTime, Time, Identity
-from models import base
-from models.Module_de_Formation import Module_de_Formation
+from . import base
 
-class Evaluation(base.base):
+class Evaluation(base):
     __tablename__ = "Evaluations"
     idEvaluations = Column(Integer, Identity(start=0, increment=1), primary_key=True)
     type = Column(String(50))

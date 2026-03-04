@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, Session
-from models.Utilisateur import base, Utilisateur
+import models
 from pydantic import BaseModel
 from auth import GenereToken
 
@@ -34,14 +34,14 @@ def get_db():
 
 @app.get("/utilisateur")
 async def utilisateur(db:Session=Depends(get_db)):
-    return db.query(Utilisateur).all()
+    return db.query(models.Utilisateur).all()
 
 @app.post("/utilisateur")
 async def CreateUser(utilisateur:UtilisateurCreate, db: Session=Depends(get_db)):
     from passlib.context import CryptContext
     instance = CryptContext(schemes=["bcrypt"], deprecated="auto")
     MDP_hash = instance.hash(utilisateur.MDP)
-    nouveau_user = Utilisateur(nom=utilisateur.nom, prenom=utilisateur.prenom, mail=utilisateur.mail, MDP=MDP_hash)
+    nouveau_user = models.Utilisateur(nom=utilisateur.nom, prenom=utilisateur.prenom, mail=utilisateur.mail, MDP=MDP_hash)
     db.add(nouveau_user)
     db.commit()
     db.refresh(nouveau_user)
@@ -49,7 +49,7 @@ async def CreateUser(utilisateur:UtilisateurCreate, db: Session=Depends(get_db))
 
 @app.get("/utilisateur/{id}")
 async def getUtilisateur(id: int, db:Session=Depends(get_db)):
-    return db.query(Utilisateur).filter(Utilisateur.idUtilisateur == id).first()
+    return db.query(models.Utilisateur).filter(models.Utilisateur.idUtilisateur == id).first()
 
 @app.put("/utilisateur/{id}")
 async def ModifUtilisateur(donnesModifiees: UtilisateurCreate, id: int, db:Session=Depends(get_db)):
@@ -80,7 +80,7 @@ async def token(login: Login, db: Session=Depends(get_db)):
     instance = CryptContext(schemes=["bcrypt"], deprecated="auto")
     email = login.mail
     MDP = login.MDP
-    utilisateur_trouve = db.query(Utilisateur).filter(Utilisateur.mail == email).first()
+    utilisateur_trouve = db.query(models.Utilisateur).filter(models.Utilisateur.mail == email).first()
     if utilisateur_trouve == None:
         raise HTTPException(status_code=401, detail="Connexions non-autorisé")
     else:
