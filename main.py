@@ -3,7 +3,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, Session
 import models
 from pydantic import BaseModel
-from auth import GenereToken
+from auth import GenereToken, get_current_user
 
 DATABASE_URL = "mssql+pyodbc://./ISEN?driver=ODBC+Driver+17+for+SQL+Server&Trusted_Connection=yes"
 
@@ -20,6 +20,14 @@ class UtilisateurCreate(BaseModel):
 class Login(BaseModel):
     mail : str
     MDP : str
+
+class FormationCreate(BaseModel):
+    titre: str
+    niveaux: str
+
+class ModuleCreate(BaseModel):
+    titre: str
+    durée: str
 
 @app.get("/")
 async def root():
@@ -65,7 +73,10 @@ async def ModifUtilisateur(donnesModifiees: UtilisateurCreate, id: int, db:Sessi
     return utilisateur
 
 @app.delete("/utilisateur/{id}")
-async def SuppUtilisateur(id: int, db:Session=Depends(get_db)):
+async def SuppUtilisateur(
+    id: int, db:Session=Depends(get_db),
+    utilisateur_id: int = Depends(get_current_user)
+    ):
     utilisateur = await getUtilisateur(id, db)
     if not utilisateur:
         raise HTTPException(status_code=404, detail="Utilisateur non trouvé")
