@@ -4,10 +4,36 @@ from datetime import datetime, timedelta
 from dotenv import load_dotenv
 from fastapi.security import OAuth2PasswordBearer
 from fastapi import Depends, HTTPException, status
+from database import get_db
+from ldap_services import rechercher_infos, connection
+import ldap_services
+import models
+import routers
 
 load_dotenv()
 oauth_scheme = OAuth2PasswordBearer(tokenUrl="login")
 CLE = os.getenv("CLE_SECRETE")
+
+def verif_acces(login, password, db):
+    conn = ldap_services.connection(login, password)
+    if conn :
+        user = db.query(models.Utilisateur).filter(models.Utilisateur.mail == login).first()
+        if not user :
+            donnees_ldap = ldap_services.rechercher_infos(login)
+            if donnees_ldap:
+                user = models.Utilisateur(
+                    nom = donnees_ldap['nom'],
+                    prenom = donnees_ldap['prenom'],
+                    mail = login
+                    )
+                db.add(user)
+                db.commit()
+                db.refresh(user)
+            else:
+                return None
+        return GenereToken(user.idUtilisateur)
+    return None
+    
 
 def GenereToken(id_utilisateur):
     quinze_min = timedelta(minutes=15)

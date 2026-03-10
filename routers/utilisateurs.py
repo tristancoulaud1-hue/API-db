@@ -12,7 +12,6 @@ class UtilisateurCreate(BaseModel):
     nom : str
     prenom : str
     mail : str
-    MDP : str
 
 @router.get("/")
 async def utilisateur(db:Session=Depends(get_db)):
@@ -20,10 +19,7 @@ async def utilisateur(db:Session=Depends(get_db)):
 
 @router.post("/")
 async def CreateUser(utilisateur:UtilisateurCreate, db: Session=Depends(get_db)):
-    from passlib.context import CryptContext
-    instance = CryptContext(schemes=["bcrypt"], deprecated="auto")
-    MDP_hash = instance.hash(utilisateur.MDP)
-    nouveau_user = models.Utilisateur(nom=utilisateur.nom, prenom=utilisateur.prenom, mail=utilisateur.mail, MDP=MDP_hash)
+    nouveau_user = models.Utilisateur(nom=utilisateur.nom, prenom=utilisateur.prenom, mail=utilisateur.mail)
     db.add(nouveau_user)
     db.commit()
     db.refresh(nouveau_user)
@@ -58,3 +54,7 @@ async def SuppUtilisateur(
         db.delete(utilisateur)
         db.commit()
     return "Utilisateurs Supprimé"
+
+@router.get("/mon_compte")
+async def voir_profil(user_id: int = Depends(get_current_user)):
+    return {"message": f"Bonjour utilisateur numéro {user_id}"}

@@ -3,6 +3,7 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from fastapi import Depends, HTTPException
 from datetime import datetime
+from sqlalchemy import DateTime
 import models
 from database import get_db
 from auth import get_current_user

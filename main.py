@@ -2,13 +2,22 @@ from fastapi import FastAPI
 import models
 from pydantic import BaseModel
 from routers import (
-    utilisateurs, formations, login, modules,
-    sessions_de_formation, evaluations, resultats,
-    recommendations_ia, utilisateurs_sessions,
-    formations_modules, recommendations_formations,
-    utilisateurs_evaluations
+    utilisateurs, 
+    formations, 
+    login, 
+    modules, 
+    evaluations, 
+    sessions_de_formation, 
+    resultats, 
+    recommendations_ia, 
+    utilisateurs_evaluations, 
+    utilisateurs_sessions, 
+    formations_modules, 
+    recommendations_formations
 )
+from dotenv import load_dotenv
 
+load_dotenv()
 app = FastAPI()
 
 app.include_router(utilisateurs.router, prefix="/utilisateurs", tags=["Utilisateurs"])

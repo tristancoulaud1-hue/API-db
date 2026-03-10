@@ -9,7 +9,6 @@ class Utilisateur(base):
     prenom = Column(String(300))
     mail = Column(String(264))
     idRecommendation = Column(Integer, ForeignKey("RecommendationIA.idRecommendation"))
-    MDP = Column(String(200))
     sessions = relationship(
         "Session_de_Formation",
         secondary = "Utilisateur_SessionDeFormation",
